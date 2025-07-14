@@ -1,133 +1,108 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Malla Interactiva Bioquímica</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            background: #f9f9f9;
-            padding: 20px;
-        }
-        h2 {
-            margin-top: 30px;
-        }
-        .materia {
-            display: inline-block;
-            margin: 5px;
-            padding: 10px 15px;
-            border-radius: 8px;
-            background: #e0e0e0;
-            cursor: pointer;
-            position: relative;
-            transition: background 0.3s;
-        }
-        .materia.aprobada {
-            background: #81c784;
-            color: white;
-        }
-        .materia:hover::after {
-            content: attr(data-requisitos);
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: #333;
-            color: #fff;
-            padding: 5px;
-            border-radius: 4px;
-            white-space: pre-wrap;
-            z-index: 10;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Malla interactiva Bioquímica</title>
+  <style>
+    body { font-family: sans-serif; background: #f9f9f9; }
+    .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; max-width: 1200px; margin: 2rem auto; }
+    .materia { padding: 0.8rem; border: 2px solid #999; border-radius: 8px; text-align: center; background: #eee; cursor: pointer; }
+    .bloqueada { background: #ccc; border-color: #888; cursor: not-allowed; }
+    .disponible { background: #87cefa; border-color: #4682b4; }
+    .aprobada { background: #90ee90; border-color: #2e8b57; }
+  </style>
 </head>
 <body>
+  <h1 style="text-align:center;">Plan de estudios Bioquímica - Malla interactiva</h1>
+  <div class="grid" id="malla"></div>
 
-<h1>Malla Interactiva - Bioquímica</h1>
+  <script>
+    const materias = {
+      "Matematica": [],
+      "Quimica": [],
+      "Sociedad y Estado": [],
+      "IPC": [],
+      "Biología": [],
+      "Biofísica": [],
 
-<div id="malla"></div>
+      "Quimica Inorganica": ["Matematica", "Quimica", "Sociedad y Estado", "IPC", "Biología", "Biofísica"],
+      "Matemática": ["Matematica", "Quimica", "Sociedad y Estado", "IPC", "Biología", "Biofísica"],
+      "Anatomia e Histología": ["Matematica", "Quimica", "Sociedad y Estado", "IPC", "Biología", "Biofísica"],
+      "Fisica": ["Matemática"],
+      "Biologia Celular y Molecular": ["Anatomia e Histología"],
+      "Quimica Organica 1": ["Quimica Inorganica"],
 
-<script>
-const materias = [
-    {nombre:"Matematica", año:1, cuatri:1, requisitos:"Sin requisitos"},
-    {nombre:"Quimica", año:1, cuatri:1, requisitos:"Sin requisitos"},
-    {nombre:"Sociedad y Estado", año:1, cuatri:1, requisitos:"Sin requisitos"},
-    {nombre:"IPC", año:1, cuatri:2, requisitos:"Sin requisitos"},
-    {nombre:"Biología", año:1, cuatri:2, requisitos:"Sin requisitos"},
-    {nombre:"Biofísica", año:1, cuatri:2, requisitos:"Sin requisitos"},
-    
-    {nombre:"Quimica Inorganica", año:2, cuatri:1, requisitos:"Año 1 aprobado"},
-    {nombre:"Matemática", año:2, cuatri:1, requisitos:"Año 1 aprobado"},
-    {nombre:"Anatomia e Histología", año:2, cuatri:1, requisitos:"Año 1 aprobado"},
-    {nombre:"Fisica", año:2, cuatri:2, requisitos:"Matemática aprobada"},
-    {nombre:"Biologia Celular y Molecular", año:2, cuatri:2, requisitos:"Anatomia e Histología"},
-    {nombre:"Quimica Organica 1", año:2, cuatri:2, requisitos:"Quimica Inorganica"},
-    
-    {nombre:"Quimica Organica 2", año:3, cuatri:1, requisitos:"Fisica, Quimica Organica 1"},
-    {nombre:"Fisiologia", año:3, cuatri:1, requisitos:"Anatomia e Histología, Biologia Celular y Molecular"},
-    {nombre:"Quimica Analítica", año:3, cuatri:1, requisitos:"Quimica Inorganica, Matemática"},
-    {nombre:"Fisicoquimica", año:3, cuatri:2, requisitos:"Quimica Inorganica, Fisica"},
-    {nombre:"Quimica Instrumental", año:3, cuatri:2, requisitos:"Fisica, Quimica Analítica"},
-    {nombre:"Quimica Biologica", año:3, cuatri:2, requisitos:"Biologia Celular y Molecular, Quimica Organica 2"},
-    
-    {nombre:"Fisiopatología", año:4, cuatri:1, requisitos:"Fisiologia"},
-    {nombre:"Microbiologia", año:4, cuatri:1, requisitos:"Quimica Biologica"},
-    {nombre:"Quimica Biologica Superior", año:4, cuatri:1, requisitos:"Fisicoquimica, Quimica Instrumental, Quimica Biologica"},
-    {nombre:"Genética Molecular", año:4, cuatri:1, requisitos:"Quimica Biologica"},
-    {nombre:"Inmunología", año:4, cuatri:2, requisitos:"Fisiologia, Microbiologia, Quimica Biologica"},
-    {nombre:"Farmacología", año:4, cuatri:2, requisitos:"Fisiologia, Quimica Biologica, Fisiopatología"},
-    {nombre:"Biotecnología (bim)", año:4, cuatri:2, requisitos:"Microbiologia, Genetica Molecular"},
-    {nombre:"Virología (bim)", año:4, cuatri:2, requisitos:"Microbiologia, Genetica Molecular"},
-    {nombre:"Nutrición", año:4, cuatri:2, requisitos:"Fisiologia, Quimica Biologica, Fisiopatología"},
-    
-    {nombre:"Microbiología Clínica", año:5, cuatri:1, requisitos:"Fisiopatología, Microbiologia, Inmunología, Virología"},
-    {nombre:"Bioquimica Clínica 1", año:5, cuatri:1, requisitos:"Quimica Biologica, Fisiopatología, Quimica Biologica Superior, Inmunología"},
-    {nombre:"Practica Profesional Interna", año:5, cuatri:1, requisitos:"Fisiopatología, Microbiologia, Inmunología, Virología, Quimica Biologica, Quimica Biologica Superior"},
-    {nombre:"Toxicología y Quimica Legal", año:5, cuatri:2, requisitos:"Quimica Analítica, Quimica Instrumental, Quimica Biologica, Farmacología"},
-    {nombre:"Bromatologia", año:5, cuatri:2, requisitos:"Microbiologia, Nutrición"},
-    {nombre:"Bioquimica de Metabolopatías (bim)", año:5, cuatri:2, requisitos:"Quimica Biologica, Fisiopatología"},
-    {nombre:"Genetica Forense (bim)", año:5, cuatri:2, requisitos:"Genetica Molecular"},
-    {nombre:"Bioquimica Clínica 2", año:5, cuatri:2, requisitos:"Fisiopatología, Quimica Biologica Superior, Bioquimica Clínica 1"},
-    
-    {nombre:"Practica Profesional Externa", año:6, cuatri:1, requisitos:"Practica Profesional Interna"},
-    {nombre:"Asignatura de la Orientacion", año:6, cuatri:1, requisitos:"Todo hasta 5to año"},
-    {nombre:"Optativas bimestrales", año:6, cuatri:1, requisitos:"5to año inclusive"},
-    
-    {nombre:"Bioquimica Clínica 3", año:7, cuatri:1, requisitos:"5to año inclusive"},
-    {nombre:"Ambiente y Salud", año:7, cuatri:1, requisitos:"5to año inclusive"},
-    {nombre:"Inmunología de los procesos infecciosos", año:7, cuatri:1, requisitos:"5to año inclusive"},
-    {nombre:"Cinetica Enzimatica", año:7, cuatri:1, requisitos:"5to año inclusive"},
-    {nombre:"Procesos de Biotecnología", año:7, cuatri:1, requisitos:"5to año inclusive"},
-    {nombre:"Toxicología Forense", año:7, cuatri:1, requisitos:"5to año inclusive"},
-    
-    {nombre:"Ingles", año:0, cuatri:0, requisitos:"Sin requisitos"},
-    {nombre:"Bioestadistica", año:0, cuatri:0, requisitos:"Matematica"},
-    {nombre:"Legislacion", año:0, cuatri:0, requisitos:"2do año inclusive"},
-    {nombre:"Salud Publica", año:0, cuatri:0, requisitos:"Microbiologia"},
-    {nombre:"Practica social educativa", año:0, cuatri:0, requisitos:"5to año inclusive"},
-];
+      "Quimica Organica 2": ["Fisica", "Quimica Organica 1"],
+      "Fisiologia": ["Anatomia e Histología", "Biologia Celular y Molecular"],
+      "Quimica Analítica": ["Quimica Inorganica", "Matemática"],
+      "Fisicoquimica": ["Quimica Inorganica", "Fisica"],
+      "Quimica Instrumental": ["Fisica", "Quimica Analítica"],
+      "Quimica Biologica": ["Biologia Celular y Molecular", "Quimica Organica 2"],
 
-function crearMalla() {
-    const contenedor = document.getElementById("malla");
-    materias.forEach((mat, idx) => {
-        const div = document.createElement("div");
-        div.className = "materia";
-        div.textContent = mat.nombre;
-        div.setAttribute("data-requisitos", mat.requisitos);
-        div.onclick = () => toggleAprobada(div, idx);
-        if(localStorage.getItem(`materia_${idx}`) === "1"){
-            div.classList.add("aprobada");
+      "Fisiopatología": ["Fisiologia"],
+      "Microbiologia": ["Quimica Biologica"],
+      "Quimica Biologica Superior": ["Fisicoquimica", "Quimica Instrumental", "Quimica Biologica"],
+      "Genética Molecular": ["Quimica Biologica"],
+      "Inmunología": ["Fisiologia", "Microbiologia", "Quimica Biologica"],
+      "Farmacología": ["Fisiologia", "Quimica Biologica", "Fisiopatología"],
+      "Biotecnología (bim)": ["Microbiologia", "Genética Molecular"],
+      "Virología (bim)": ["Microbiologia", "Genética Molecular"],
+      "Nutrición": ["Fisiologia", "Quimica Biologica", "Fisiopatología"],
+
+      "Microbiología Clínica": ["Fisiopatología", "Microbiologia", "Inmunología", "Virología (bim)"],
+      "Bioquimica Clínica 1": ["Quimica Biologica", "Fisiopatología", "Quimica Biologica Superior", "Inmunología"],
+      "Practica Profesional Bioquimica Interna": ["Fisiopatología", "Microbiologia", "Inmunología", "Virología (bim)", "Quimica Biologica", "Quimica Biologica Superior"],
+      "Toxicología y Quimica Legal": ["Quimica Analítica", "Quimica Instrumental", "Quimica Biologica", "Farmacología"],
+      "Bromatologia": ["Microbiologia", "Nutrición"],
+      "Bioquimica de Metabolopatías (bim)": ["Quimica Biologica", "Fisiopatología"],
+      "Genetica Forense (bim)": ["Genética Molecular"],
+      "Bioquimica Clínica 2": ["Fisiopatología", "Quimica Biologica Superior", "Bioquimica Clínica 1"],
+
+      "Practica profesional Bioquimica Externa": ["Practica Profesional Bioquimica Interna"],
+      "Asignatura de la Orientacion": ["Bioquimica Clínica 2", "Practica profesional Bioquimica Externa"],
+      "Materias optativas bimestrales": ["Bioquimica Clínica 2"],
+
+      "Bioquimica Clínica 3": ["Bioquimica Clínica 2"],
+      "Ambiente y Salud": ["Bioquimica Clínica 2"],
+      "Inmunología de los procesos infecciosos": ["Bioquimica Clínica 2"],
+      "Cinetica Enzimatica": ["Bioquimica Clínica 2"],
+      "Procesos de Biotecnología": ["Bioquimica Clínica 2"],
+      "Toxicología Forense": ["Bioquimica Clínica 2"],
+
+      "Ingles": [],
+      "Bioestadistica": ["Matematica"],
+      "Legislacion": ["Quimica Organica 1"],
+      "Salud Publica": ["Microbiologia"],
+      "Practica social educativa": ["Bioquimica Clínica 2"]
+    };
+
+    const estado = {};
+
+    const malla = document.getElementById('malla');
+
+    function puedeHabilitar(materia) {
+      return materias[materia].every(pre => estado[pre] === 'aprobada');
+    }
+
+    function render() {
+      malla.innerHTML = '';
+      Object.keys(materias).forEach(materia => {
+        let div = document.createElement('div');
+        let st = estado[materia] || (puedeHabilitar(materia) ? 'disponible' : 'bloqueada');
+        div.className = `materia ${st}`;
+        div.innerText = materia;
+        if (st === 'disponible') {
+          div.onclick = () => {
+            estado[materia] = 'aprobada';
+            render();
+          }
         }
-        contenedor.appendChild(div);
-    });
-}
+        malla.appendChild(div);
+      });
+    }
 
-function toggleAprobada(el, idx){
-    el.classList.toggle("aprobada");
-    localStorage.setItem(`materia_${idx}`, el.classList.contains("aprobada") ? "1" : "0");
-}
-
-crearMalla();
-</script>
-
+    render();
+  </script>
 </body>
 </html>
